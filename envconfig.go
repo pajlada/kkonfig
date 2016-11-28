@@ -45,12 +45,19 @@ func (e *ParseError) Error() string {
 	return fmt.Sprintf("envconfig.Process: assigning %[1]s to %[2]s: converting '%[3]s' to type %[4]s. details: %[5]s", e.KeyName, e.FieldName, e.Value, e.TypeName, e.Err)
 }
 
-// Process populates the specified struct based on environment variables
-func Process(prefix string, spec interface{}) error {
-	path := prefix + ".json"
-	jsonBytes, err := ioutil.ReadFile(path)
-	if err == nil {
-		json.Unmarshal(jsonBytes, spec)
+// Process populates the specified struct in the following steps:
+// 1. Fill in with default values
+// 2. Read from given config files
+// 3. Read from environment variables
+func Process(prefix string, configPaths []string, spec interface{}) error {
+	if configPaths != nil {
+		for _, path := range configPaths {
+			if jsonBytes, err := ioutil.ReadFile(path); err == nil {
+				if json.Unmarshal(jsonBytes, spec) != nil {
+					continue
+				}
+			}
+		}
 	}
 	s := reflect.ValueOf(spec)
 
@@ -102,7 +109,7 @@ func Process(prefix string, spec interface{}) error {
 				}
 
 				embeddedPtr := f.Addr().Interface()
-				if err := Process(innerPrefix, embeddedPtr); err != nil {
+				if err := Process(innerPrefix, nil, embeddedPtr); err != nil {
 					return err
 				}
 				f.Set(reflect.ValueOf(embeddedPtr).Elem())
@@ -149,8 +156,8 @@ func Process(prefix string, spec interface{}) error {
 }
 
 // MustProcess is the same as Process but panics if an error occurs
-func MustProcess(prefix string, spec interface{}) {
-	if err := Process(prefix, spec); err != nil {
+func MustProcess(prefix string, configPaths []string, spec interface{}) {
+	if err := Process(prefix, configPaths, spec); err != nil {
 		panic(err)
 	}
 }

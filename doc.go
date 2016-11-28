@@ -2,7 +2,7 @@
 // Use of this source code is governed by the MIT License that can be found in
 // the LICENSE file.
 
-// Package envconfig implements decoding of environment variables based on a user
-// defined specification. A typical use is using environment variables for
-// configuration settings.
+// Package kkonfig is based off envconfig. Instead of just using default
+// values and environment variables, we add a middle step where we parse
+// given json files
 package kkonfig

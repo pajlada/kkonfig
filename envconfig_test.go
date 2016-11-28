@@ -69,22 +69,52 @@ type EmbeddedButIgnored struct {
 func TestProcess(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_DEBUG", "true")
-	os.Setenv("ENV_CONFIG_PORT", "8080")
-	os.Setenv("ENV_CONFIG_RATE", "0.5")
-	os.Setenv("ENV_CONFIG_USER", "Kelsey")
-	os.Setenv("ENV_CONFIG_TIMEOUT", "2m")
-	os.Setenv("ENV_CONFIG_ADMINUSERS", "John,Adam,Will")
-	os.Setenv("ENV_CONFIG_MAGICNUMBERS", "5,10,20")
-	os.Setenv("SERVICE_HOST", "127.0.0.1")
-	os.Setenv("ENV_CONFIG_TTL", "30")
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
-	os.Setenv("ENV_CONFIG_IGNORED", "was-not-ignored")
-	os.Setenv("ENV_CONFIG_OUTER_INNER", "iamnested")
-	os.Setenv("ENV_CONFIG_AFTERNESTED", "after")
-	os.Setenv("ENV_CONFIG_HONOR", "honor")
-	os.Setenv("ENV_CONFIG_DATETIME", "2016-08-16T18:57:05Z")
-	err := Process("env_config", &s)
+	if os.Setenv("ENV_CONFIG_DEBUG", "true") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_PORT", "8080") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_RATE", "0.5") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_USER", "Kelsey") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_TIMEOUT", "2m") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_ADMINUSERS", "John,Adam,Will") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_MAGICNUMBERS", "5,10,20") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("SERVICE_HOST", "127.0.0.1") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_TTL", "30") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_IGNORED", "was-not-ignored") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_OUTER_INNER", "iamnested") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_AFTERNESTED", "after") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_HONOR", "honor") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_DATETIME", "2016-08-16T18:57:05Z") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	err := Process("env_config", nil, &s)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -152,9 +182,13 @@ func TestProcess(t *testing.T) {
 func TestParseErrorBool(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_DEBUG", "string")
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
-	err := Process("env_config", &s)
+	if os.Setenv("ENV_CONFIG_DEBUG", "string") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	err := Process("env_config", nil, &s)
 	v, ok := err.(*ParseError)
 	if !ok {
 		t.Errorf("expected ParseError, got %v", v)
@@ -170,9 +204,13 @@ func TestParseErrorBool(t *testing.T) {
 func TestParseErrorFloat32(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_RATE", "string")
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
-	err := Process("env_config", &s)
+	if os.Setenv("ENV_CONFIG_RATE", "string") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	err := Process("env_config", nil, &s)
 	v, ok := err.(*ParseError)
 	if !ok {
 		t.Errorf("expected ParseError, got %v", v)
@@ -188,9 +226,13 @@ func TestParseErrorFloat32(t *testing.T) {
 func TestParseErrorInt(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_PORT", "string")
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
-	err := Process("env_config", &s)
+	if os.Setenv("ENV_CONFIG_PORT", "string") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	err := Process("env_config", nil, &s)
 	v, ok := err.(*ParseError)
 	if !ok {
 		t.Errorf("expected ParseError, got %v", v)
@@ -206,8 +248,10 @@ func TestParseErrorInt(t *testing.T) {
 func TestParseErrorUint(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_TTL", "-30")
-	err := Process("env_config", &s)
+	if os.Setenv("ENV_CONFIG_TTL", "-30") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	err := Process("env_config", nil, &s)
 	v, ok := err.(*ParseError)
 	if !ok {
 		t.Errorf("expected ParseError, got %v", v)
@@ -222,7 +266,7 @@ func TestParseErrorUint(t *testing.T) {
 
 func TestErrInvalidSpecification(t *testing.T) {
 	m := make(map[string]string)
-	err := Process("env_config", &m)
+	err := Process("env_config", nil, &m)
 	if err != ErrInvalidSpecification {
 		t.Errorf("expected %v, got %v", ErrInvalidSpecification, err)
 	}
@@ -231,9 +275,13 @@ func TestErrInvalidSpecification(t *testing.T) {
 func TestUnsetVars(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("USER", "foo")
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
-	if err := Process("env_config", &s); err != nil {
+	if os.Setenv("USER", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 
@@ -247,11 +295,19 @@ func TestUnsetVars(t *testing.T) {
 func TestAlternateVarNames(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_MULTI_WORD_VAR", "foo")
-	os.Setenv("ENV_CONFIG_MULTI_WORD_VAR_WITH_ALT", "bar")
-	os.Setenv("ENV_CONFIG_MULTI_WORD_VAR_WITH_LOWER_CASE_ALT", "baz")
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
-	if err := Process("env_config", &s); err != nil {
+	if os.Setenv("ENV_CONFIG_MULTI_WORD_VAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_MULTI_WORD_VAR_WITH_ALT", "bar") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_MULTI_WORD_VAR_WITH_LOWER_CASE_ALT", "baz") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 
@@ -276,8 +332,10 @@ func TestAlternateVarNames(t *testing.T) {
 func TestRequiredVar(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foobar")
-	if err := Process("env_config", &s); err != nil {
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "foobar") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 
@@ -289,8 +347,10 @@ func TestRequiredVar(t *testing.T) {
 func TestBlankDefaultVar(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "requiredvalue")
-	if err := Process("env_config", &s); err != nil {
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "requiredvalue") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 
@@ -306,9 +366,13 @@ func TestBlankDefaultVar(t *testing.T) {
 func TestNonBlankDefaultVar(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_DEFAULTVAR", "nondefaultval")
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "requiredvalue")
-	if err := Process("env_config", &s); err != nil {
+	if os.Setenv("ENV_CONFIG_DEFAULTVAR", "nondefaultval") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "requiredvalue") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 
@@ -320,10 +384,14 @@ func TestNonBlankDefaultVar(t *testing.T) {
 func TestExplicitBlankDefaultVar(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_DEFAULTVAR", "")
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "")
+	if os.Setenv("ENV_CONFIG_DEFAULTVAR", "") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
 
-	if err := Process("env_config", &s); err != nil {
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 
@@ -335,9 +403,13 @@ func TestExplicitBlankDefaultVar(t *testing.T) {
 func TestAlternateNameDefaultVar(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("BROKER", "betterbroker")
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
-	if err := Process("env_config", &s); err != nil {
+	if os.Setenv("BROKER", "betterbroker") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 
@@ -346,8 +418,10 @@ func TestAlternateNameDefaultVar(t *testing.T) {
 	}
 
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
-	if err := Process("env_config", &s); err != nil {
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 
@@ -359,8 +433,10 @@ func TestAlternateNameDefaultVar(t *testing.T) {
 func TestRequiredDefault(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
-	if err := Process("env_config", &s); err != nil {
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 
@@ -372,8 +448,10 @@ func TestRequiredDefault(t *testing.T) {
 func TestPointerFieldBlank(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
-	if err := Process("env_config", &s); err != nil {
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 
@@ -385,13 +463,25 @@ func TestPointerFieldBlank(t *testing.T) {
 func TestMustProcess(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_DEBUG", "true")
-	os.Setenv("ENV_CONFIG_PORT", "8080")
-	os.Setenv("ENV_CONFIG_RATE", "0.5")
-	os.Setenv("ENV_CONFIG_USER", "Kelsey")
-	os.Setenv("SERVICE_HOST", "127.0.0.1")
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
-	MustProcess("env_config", &s)
+	if os.Setenv("ENV_CONFIG_DEBUG", "true") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_PORT", "8080") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_RATE", "0.5") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_USER", "Kelsey") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("SERVICE_HOST", "127.0.0.1") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	MustProcess("env_config", nil, &s)
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -401,22 +491,40 @@ func TestMustProcess(t *testing.T) {
 		t.Error("expected panic")
 	}()
 	m := make(map[string]string)
-	MustProcess("env_config", &m)
+	MustProcess("env_config", nil, &m)
 }
 
 func TestEmbeddedStruct(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "required")
-	os.Setenv("ENV_CONFIG_ENABLED", "true")
-	os.Setenv("ENV_CONFIG_EMBEDDEDPORT", "1234")
-	os.Setenv("ENV_CONFIG_MULTIWORDVAR", "foo")
-	os.Setenv("ENV_CONFIG_MULTI_WORD_VAR_WITH_ALT", "bar")
-	os.Setenv("ENV_CONFIG_MULTI_WITH_DIFFERENT_ALT", "baz")
-	os.Setenv("ENV_CONFIG_EMBEDDED_WITH_ALT", "foobar")
-	os.Setenv("ENV_CONFIG_SOMEPOINTER", "foobaz")
-	os.Setenv("ENV_CONFIG_EMBEDDED_IGNORED", "was-not-ignored")
-	if err := Process("env_config", &s); err != nil {
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "required") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_ENABLED", "true") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_EMBEDDEDPORT", "1234") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_MULTIWORDVAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_MULTI_WORD_VAR_WITH_ALT", "bar") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_MULTI_WITH_DIFFERENT_ALT", "baz") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_EMBEDDED_WITH_ALT", "foobar") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_SOMEPOINTER", "foobaz") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_EMBEDDED_IGNORED", "was-not-ignored") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 	if !s.Enabled {
@@ -451,10 +559,16 @@ func TestEmbeddedStruct(t *testing.T) {
 func TestEmbeddedButIgnoredStruct(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "required")
-	os.Setenv("ENV_CONFIG_FIRSTEMBEDDEDBUTIGNORED", "was-not-ignored")
-	os.Setenv("ENV_CONFIG_SECONDEMBEDDEDBUTIGNORED", "was-not-ignored")
-	if err := Process("env_config", &s); err != nil {
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "required") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_FIRSTEMBEDDEDBUTIGNORED", "was-not-ignored") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_SECONDEMBEDDEDBUTIGNORED", "was-not-ignored") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 	if s.FirstEmbeddedButIgnored != "" {
@@ -468,9 +582,11 @@ func TestEmbeddedButIgnoredStruct(t *testing.T) {
 func TestNonPointerFailsProperly(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "snap")
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "snap") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
 
-	err := Process("env_config", s)
+	err := Process("env_config", nil, s)
 	if err != ErrInvalidSpecification {
 		t.Errorf("non-pointer should fail with ErrInvalidSpecification, was instead %s", err)
 	}
@@ -489,12 +605,20 @@ func TestCustomValueFields(t *testing.T) {
 	s.Baz = quoted{new(bracketed)}
 
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_FOO", "foo")
-	os.Setenv("ENV_CONFIG_BAR", "bar")
-	os.Setenv("ENV_CONFIG_BAZ", "baz")
-	os.Setenv("ENV_CONFIG_STRUCT", "inner")
+	if os.Setenv("ENV_CONFIG_FOO", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_BAR", "bar") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_BAZ", "baz") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_STRUCT", "inner") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
 
-	if err := Process("env_config", &s); err != nil {
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 
@@ -529,12 +653,20 @@ func TestCustomPointerFields(t *testing.T) {
 	s.Baz = &quoted{new(bracketed)}
 
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_FOO", "foo")
-	os.Setenv("ENV_CONFIG_BAR", "bar")
-	os.Setenv("ENV_CONFIG_BAZ", "baz")
-	os.Setenv("ENV_CONFIG_STRUCT", "inner")
+	if os.Setenv("ENV_CONFIG_FOO", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_BAR", "bar") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_BAZ", "baz") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_STRUCT", "inner") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
 
-	if err := Process("env_config", &s); err != nil {
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 
@@ -558,9 +690,11 @@ func TestCustomPointerFields(t *testing.T) {
 func TestEmptyPrefixUsesFieldNames(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("REQUIREDVAR", "foo")
+	if os.Setenv("REQUIREDVAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
 
-	err := Process("", &s)
+	err := Process("", nil, &s)
 	if err != nil {
 		t.Errorf("Process failed: %s", err)
 	}
@@ -576,10 +710,14 @@ func TestEmptyPrefixUsesFieldNames(t *testing.T) {
 func TestNestedStructVarName(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "required")
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "required") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
 	val := "found with only short name"
-	os.Setenv("INNER", val)
-	if err := Process("env_config", &s); err != nil {
+	if os.Setenv("INNER", val) != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if err := Process("env_config", nil, &s); err != nil {
 		t.Error(err.Error())
 	}
 	if s.NestedSpecification.Property != val {
@@ -590,10 +728,14 @@ func TestNestedStructVarName(t *testing.T) {
 func TestTextUnmarshalerError(t *testing.T) {
 	var s Specification
 	os.Clearenv()
-	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
-	os.Setenv("ENV_CONFIG_DATETIME", "I'M NOT A DATE")
+	if os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
+	if os.Setenv("ENV_CONFIG_DATETIME", "I'M NOT A DATE") != nil {
+		t.Errorf("Unable to use os.Setenv")
+	}
 
-	err := Process("env_config", &s)
+	err := Process("env_config", nil, &s)
 
 	v, ok := err.(*ParseError)
 	if !ok {
