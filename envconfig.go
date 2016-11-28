@@ -2,12 +2,14 @@
 // Use of this source code is governed by the MIT License that can be found in
 // the LICENSE file.
 
-package envconfig
+package kkonfig
 
 import (
 	"encoding"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"reflect"
 	"strconv"
 	"strings"
@@ -45,6 +47,11 @@ func (e *ParseError) Error() string {
 
 // Process populates the specified struct based on environment variables
 func Process(prefix string, spec interface{}) error {
+	path := prefix + ".json"
+	jsonBytes, err := ioutil.ReadFile(path)
+	if err == nil {
+		json.Unmarshal(jsonBytes, spec)
+	}
 	s := reflect.ValueOf(spec)
 
 	if s.Kind() != reflect.Ptr {

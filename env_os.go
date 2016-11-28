@@ -1,6 +1,6 @@
 // +build appengine
 
-package envconfig
+package kkonfig
 
 import "os"
 
