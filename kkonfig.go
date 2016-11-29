@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -164,7 +165,7 @@ func processEnvironmentValues(prefix string, spec interface{}) error {
 		// and an unset value. `os.LookupEnv` is preferred to `syscall.Getenv`,
 		// but it is only available in go1.5 or newer. We're using Go build tags
 		// here to use os.LookupEnv for >=go1.5
-		if value, ok := lookupEnv(key); ok {
+		if value, ok := os.LookupEnv(key); ok {
 			if err := processField(value, f); err != nil {
 				return &ParseError{
 					KeyName:   key,
