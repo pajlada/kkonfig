@@ -358,7 +358,9 @@ func TestBlankDefaultVar(t *testing.T) {
 		t.Errorf("expected %s, got %s", "foobar", s.DefaultVar)
 	}
 
-	if *s.SomePointerWithDefault != "foo2baz" {
+	fmt.Println(s.SomePointerWithDefault)
+
+	if s.SomePointerWithDefault == nil || *s.SomePointerWithDefault != "foo2baz" {
 		t.Errorf("expected %s, got %s", "foo2baz", *s.SomePointerWithDefault)
 	}
 }

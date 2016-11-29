@@ -45,29 +45,8 @@ func (e *ParseError) Error() string {
 	return fmt.Sprintf("envconfig.Process: assigning %[1]s to %[2]s: converting '%[3]s' to type %[4]s. details: %[5]s", e.KeyName, e.FieldName, e.Value, e.TypeName, e.Err)
 }
 
-// Process populates the specified struct in the following steps:
-// 1. Fill in with default values
-// 2. Read from given config files
-// 3. Read from environment variables
-func Process(prefix string, configPaths []string, spec interface{}) error {
-	if configPaths != nil {
-		for _, path := range configPaths {
-			if jsonBytes, err := ioutil.ReadFile(path); err == nil {
-				if json.Unmarshal(jsonBytes, spec) != nil {
-					continue
-				}
-			}
-		}
-	}
-	s := reflect.ValueOf(spec)
-
-	if s.Kind() != reflect.Ptr {
-		return ErrInvalidSpecification
-	}
-	s = s.Elem()
-	if s.Kind() != reflect.Struct {
-		return ErrInvalidSpecification
-	}
+func processDefaultValues(spec interface{}) error {
+	s := reflect.ValueOf(spec).Elem()
 	typeOfSpec := s.Type()
 	for i := 0; i < s.NumField(); i++ {
 		f := s.Field(i)
@@ -88,18 +67,81 @@ func Process(prefix string, configPaths []string, spec interface{}) error {
 			f = f.Elem()
 		}
 
-		alt := ftype.Tag.Get("envconfig")
+		if f.Kind() == reflect.Struct {
+			embeddedPtr := f.Addr().Interface()
+			if err := processDefaultValues(embeddedPtr); err != nil {
+				return err
+			}
+			f.Set(reflect.ValueOf(embeddedPtr).Elem())
+			continue
+		}
+
+		if value, ok := ftype.Tag.Lookup("default"); ok {
+			if err := processField(value, f); err != nil {
+				return &ParseError{
+					FieldName: ftype.Name,
+					TypeName:  f.Type().String(),
+					Value:     value,
+					Err:       err,
+				}
+			}
+		}
+
+	}
+	return nil
+}
+
+func processJson(configPaths []string, spec interface{}) error {
+	// Parse potential json files into the specification
+	if configPaths != nil {
+		for _, path := range configPaths {
+			if jsonBytes, err := ioutil.ReadFile(path); err == nil {
+				if json.Unmarshal(jsonBytes, spec) != nil {
+					continue
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func processEnvironmentValues(prefix string, spec interface{}) error {
+	s := reflect.ValueOf(spec).Elem()
+	typeOfSpec := s.Type()
+	for i := 0; i < s.NumField(); i++ {
+		f := s.Field(i)
+		ftype := typeOfSpec.Field(i)
+		if !f.CanSet() || ftype.Tag.Get("ignored") == "true" {
+			continue
+		}
+
+		for f.Kind() == reflect.Ptr {
+			if f.IsNil() {
+				if f.Type().Elem().Kind() != reflect.Struct {
+					// nil pointer to a non-struct: leave it alone
+					break
+				}
+				// nil pointer to struct: create a zero instance
+				f.Set(reflect.New(f.Type().Elem()))
+			}
+			f = f.Elem()
+		}
+
 		fieldName := ftype.Name
-		if alt != "" {
+		if alt := ftype.Tag.Get("envconfig"); alt != "" {
 			fieldName = alt
 		}
 
 		key := fieldName
+		// If a prefix has been specified, modify the key from "key" to "prefix_key"
 		if prefix != "" {
 			key = fmt.Sprintf("%s_%s", prefix, key)
 		}
+
+		// Environment variables should be uppercase, modify from "prefix_key" to "PREFIX_KEY"
 		key = strings.ToUpper(key)
 
+		// The current field is a struct, continue going through that struct but with a new prefix
 		if f.Kind() == reflect.Struct {
 			// honor Decode if present
 			if decoderFrom(f) == nil && setterFrom(f) == nil && textUnmarshaler(f) == nil {
@@ -109,7 +151,7 @@ func Process(prefix string, configPaths []string, spec interface{}) error {
 				}
 
 				embeddedPtr := f.Addr().Interface()
-				if err := Process(innerPrefix, nil, embeddedPtr); err != nil {
+				if err := processEnvironmentValues(innerPrefix, embeddedPtr); err != nil {
 					return err
 				}
 				f.Set(reflect.ValueOf(embeddedPtr).Elem())
@@ -122,36 +164,64 @@ func Process(prefix string, configPaths []string, spec interface{}) error {
 		// and an unset value. `os.LookupEnv` is preferred to `syscall.Getenv`,
 		// but it is only available in go1.5 or newer. We're using Go build tags
 		// here to use os.LookupEnv for >=go1.5
-		value, ok := lookupEnv(key)
-		if !ok && alt != "" {
-			key := strings.ToUpper(fieldName)
-			value, ok = lookupEnv(key)
-		}
-
-		def := ftype.Tag.Get("default")
-		if def != "" && !ok {
-			value = def
-		}
-
-		req := ftype.Tag.Get("required")
-		if !ok && def == "" {
-			if req == "true" {
-				return fmt.Errorf("required key %s missing value", key)
-			}
-			continue
-		}
-
-		err := processField(value, f)
-		if err != nil {
-			return &ParseError{
-				KeyName:   key,
-				FieldName: fieldName,
-				TypeName:  f.Type().String(),
-				Value:     value,
-				Err:       err,
+		if value, ok := lookupEnv(key); ok {
+			if err := processField(value, f); err != nil {
+				return &ParseError{
+					KeyName:   key,
+					FieldName: fieldName,
+					TypeName:  f.Type().String(),
+					Value:     value,
+					Err:       err,
+				}
 			}
 		}
+
+		// fmt.Printf("Env value: %s: %#v\n", fieldName, value)
+
+		/*
+			req := ftype.Tag.Get("required")
+			if !ok && def == "" && !set {
+				if req == "true" {
+					return fmt.Errorf("required key %s missing value", key)
+				}
+				continue
+			}
+		*/
+
 	}
+	return nil
+}
+
+// Process populates the specified struct in the following steps:
+// 1. Fill in with default values
+// 2. Read from given config files
+// 3. Read from environment variables
+// TODO: Parse values in three steps instead of just 1. Less performant but more unsure
+func Process(prefix string, configPaths []string, spec interface{}) error {
+	// Sanity check on struct to make sure it's a pointer to a struct
+	s := reflect.ValueOf(spec)
+
+	if s.Kind() != reflect.Ptr {
+		return ErrInvalidSpecification
+	}
+	s = s.Elem()
+	if s.Kind() != reflect.Struct {
+		return ErrInvalidSpecification
+	}
+
+	err := processDefaultValues(spec)
+	if err != nil {
+		return err
+	}
+	err = processJson(configPaths, spec)
+	if err != nil {
+		return err
+	}
+	err = processEnvironmentValues(prefix, spec)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
